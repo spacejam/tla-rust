@@ -1,4 +1,4 @@
-# tla+ ∪ rust → <img src="parrot.gif" width="48" height="48" />
+# tla+rust → <img src="parrot.gif" width="48" height="48" />
 
 my goal: verify core lock-free and distributed algorithms in use
 with [rsdb](http://github.com/spacejam/rsdb) and
