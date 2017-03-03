@@ -1,4 +1,4 @@
-# TLA+Rust=<3
+# TLA ∪ Rust → ![](/parrot.gif)
 
 my goal: verify core lock-free and distributed algorithms in use
 with [rsdb](http://github.com/spacejam/rsdb) and
