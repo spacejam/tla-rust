@@ -15,9 +15,10 @@ with [rsdb](http://github.com/spacejam/rsdb) and
 an implementation in Rust. Use quickcheck and abstracted RPC/clocks
 to simulate partitions and test correctness under failure conditions.
 
-##### 1. overview of topics covered
+##### table of contents
+1. overview of topics covered
   - [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
-##### 2. lock-free algorithms for local storage
+2. lock-free algorithms for local storage
   - [ ] [lock-free ring buffer](#lock-free-ring-buffer)
   - [ ] [lock-free stack](#lock-free-stack)
   - [ ] [lock-free radix tree](#lock-free-radix-tree)
