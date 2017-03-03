@@ -18,12 +18,14 @@ to simulate partitions and test correctness under failure conditions.
 ##### table of contents
 1. overview of topics covered
   - [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
-2. lock-free algorithms for local storage
+2. lock-free algorithms for efficient local storage
   - [ ] [lock-free ring buffer](#lock-free-ring-buffer)
+  - [ ] [lock-free list](#lock-free-liss)
   - [ ] [lock-free stack](#lock-free-stack)
   - [ ] [lock-free radix tree](#lock-free-radix-tree)
   - [ ] [lock-free IO buffer](#lock-free-io-buffer)
   - [ ] [lock-free pagecache](#lock-free-pagecache)
+  - [ ] [lock-free tree](#lock-free-tree)
 3. consensus within a shard
   - [ ] [the harpoon consensus protocol](#harpoon-consensus)
 4. sharding operations
@@ -133,12 +135,56 @@ SPECIFICATION Spec
 INVARIANT MoneyInvariant
 ```
 
+# lock-free algorithms for efficient local storage
+
+In the interests of achieving a price-performance that is compelling,
+we need to make this thing sympathetic to modern hardware. Check out
+[Dmitry's wonderful blog](http://www.1024cores.net/home/lock-free-algorithms)
+for a fast overview of the important ideas here.
+
 ## lock-free ring buffer
 
+The ring buffer is at the heart of several systems in our local storage system.
+It serves as the core of our concurrent IO buffering and epoch-based GC for our
+logical page ID allocator.
+
+## lock-free list
+The list allows us to CAS a partial update to a page into a chain, avoiding
+the work of rewriting the entire page. To read a page, we traverse its list
+until we learn about what we sought. Eventually, we need to compact the list
+of partial updates to improve locality, probably around 4-8.
+
 ## lock-free stack
+The stack allows us to maintain a free list of page identifiers. Our radix
+tree needs to be very densely populated to achieve a favorable data to
+pointer ratio, and by reusing page identifiers after they are freed, we
+are able to keep it dense. Hence this stack. When we free a page, we push
+its identifier into this stack for reuse.
+
 ## lock-free radix tree
+We use a radix tree for maintaining our in-memory mapping from logical
+page ID to its list of partial updates. A well-built radix tree can
+achieve a .92 total size:data ratio when densely populated and using a
+contiguous key range. This is way better than what we get with B+ trees,
+which max out between .5-.6. The downside is that with low-density we
+get extremely poor data:pointer ratios with a radix tree.
+
 ## lock-free IO buffer
+We use a ring buffer to hold buffers for writing data onto the disk, along
+with associated metadata about where on disk the buffer will end up.
+This is fraught with peril. We need to avoid ABA problems in the CAS that
+claims a particular buffer, and later relies on a particular log offset.
+We also need to avoid creating a stall when all available buffers are
+claimed, and a write depends on flushing the end of the buffer before the
+beginning is free. Possible ways of avoiding: fail reservation attempts
+when the buffer is full of claims, support growing the buffer when necessary.
+Bandaid: don't seal entire buffer during commit of reservation.
+
 ## lock-free pagecache
+Combines the radix tree, stack, and IO buffer to manage our state.
+
+## lock-free tree
+
 # consensus within a shard
 ## harpoon consensus
 # sharding operations
