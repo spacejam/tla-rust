@@ -1,6 +1,6 @@
 # tla+ ∪ rust → ![](/parrot.gif)
 
-<img src="parrot.gif" width="200" height="400" />
+<img src="parrot.gif" width="48" height="48" />
 
 my goal: verify core lock-free and distributed algorithms in use
 with [rsdb](http://github.com/spacejam/rsdb) and
