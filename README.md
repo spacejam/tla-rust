@@ -1,11 +1,33 @@
 # tla+rust → <img src="parrot.gif" width="48" height="48" />
 
-my goal: verify core lock-free and distributed algorithms in use
-with [rsdb](http://github.com/spacejam/rsdb) and
-[rasputin](http://github.com/disasters/rasputin).
+Stable stateful systems through modeling, linear types,
+simulation, fault injection, and property testing.
 
-- [x] [intro: processes and labels](#here-we-go-jumping-into-pluscal)
+I like to use things that wake me up at 4am as rarely as possible.
+It's generally a mistake to focus on reliability as an infrastructure vendor.
+Even if a company gives reliability lip service, it's unlikely that they
+use techniques like modeling, fault injection, or quickcheck to back up their
+words. Let's just build an open-source distributed stateful platform that
+takes correctness seriously from the bits on disk, through the local
+transactional logic, through the multi-node transactional logic.
+
+My goal: verify core lock-free and distributed algorithms in use
+with [rsdb](http://github.com/spacejam/rsdb) and
+[rasputin](http://github.com/disasters/rasputin) with TLA+. Write
+an implementation in Rust. Create property tests that exercise it.
+Use quickcheck and abstracted RPC/clocks to simulate partitions
+and test correctness under failure conditions.
+
+- [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
 - [ ] [lock-free ring buffer](#lock-free-ring-buffer)
+- [ ] [lock-free stack](#lock-free-stack)
+- [ ] [lock-free radix tree](#lock-free-radix-tree)
+- [ ] [lock-free IO buffer](#lock-free-io-buffer)
+- [ ] [lock-free pagecache](#lock-free-pagecache)
+- [ ] [the harpoon consensus protocol](#harpoon-consensus)
+- [ ] [shard splitting](#shard-splitting)
+- [ ] [shard merging] (#shard-merging)
+- [ ] [cross-shard 2PC](#cross-shard-2pc)
 
 # here we go... jumping into pluscal
 
@@ -13,7 +35,7 @@ This is a summary of an example from
 [a wonderful primer on TLA+](https://www.learntla.com/introduction/example/)...
 
 The first thing to know is that there are two languages in play: pluscal and TLA.
-We test code using `tlc`, which understands most of TLA (not infinite sets, maybe
+We test models using `tlc`, which understands most of TLA (not infinite sets, maybe
 other stuff). TLA started as a specification language, tlc came along later to
 actually test it, and pluscal is a simpler language that can be transpiled into
 TLA. Pluscal has two forms, `c` and `p`. They are functionally identical, but
