@@ -32,7 +32,7 @@ to simulate partitions and test correctness under failure conditions.
 5. distributed transactions
   - [ ] [cross-shard 2PC](#cross-shard-2pc)
 
-# here we go... jumping into pluscal
+## here we go... jumping into pluscal
 
 This is a summary of an example from
 [a wonderful primer on TLA+](https://www.learntla.com/introduction/example/)...
@@ -133,6 +133,16 @@ SPECIFICATION Spec
 INVARIANT MoneyInvariant
 ```
 
-# lock-free ring buffer
+## lock-free ring buffer
 
-Let's write a lock-free ring buffer!
+## lock-free stack
+## lock-free radix tree
+## lock-free IO buffer
+## lock-free pagecache
+# consensus within a shard
+## harpoon consensus
+# sharding operations
+## shard splitting
+## shard merging
+# distributed transactions
+## cross-shard 2PC
