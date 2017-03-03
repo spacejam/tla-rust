@@ -1,6 +1,6 @@
-all: process test
+all: transpile test
 
-process:
+transpile:
 	pcal2tla *tla
 
 test:

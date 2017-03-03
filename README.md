@@ -1,18 +1,24 @@
-# TLA+ notes
+# TLA+Rust=<3
 
 my goal: verify core lock-free and distributed algorithms in use
 with [rsdb](http://github.com/spacejam/rsdb) and
 [rasputin](http://github.com/disasters/rasputin).
+
+- [x] [intro: processes and labels](#here-we-go-jumping-into-pluscal)
+- [ ] [lock-free ring buffer](#lock-free-ring-buffer)
 
 # here we go... jumping into pluscal
 
 This is a summary of an example from
 [a wonderful primer on TLA+](https://www.learntla.com/introduction/example/)...
 
-The first thing to know, is there are two languages in play. Pluscal, and TLA.
-We test code using `tlc`, which understands TLA, but can't run anything that
-you can specify in TLA, such as infinite sets, as it will test all permutations
-of possible values and interleavings of steps.
+The first thing to know is that there are two languages in play: pluscal and TLA.
+We test code using `tlc`, which understands most of TLA (not infinite sets, maybe
+other stuff). TLA started as a specification language, tlc came along later to
+actually test it, and pluscal is a simpler language that can be transpiled into
+TLA. Pluscal has two forms, `c` and `p`. They are functionally identical, but
+`c` form uses braces and `p` form uses prolog/ruby-esque `begin` and `end`
+statements that can be a little easier to spot errors with, in my opinion.
 
 We're writing Pluscal in a TLA comment (block comments are written
 with `(* <comment text> *)`), and when we run a translator like `pcal2tla`
@@ -102,4 +108,6 @@ SPECIFICATION Spec
 INVARIANT MoneyInvariant
 ```
 
+# lock-free ring buffer
 
+Let's write a lock-free ring buffer!

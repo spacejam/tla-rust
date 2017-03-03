@@ -11,7 +11,7 @@ begin
 Transfer:
   if alice_account >= money then
      alice_account := alice_account - money;
-       bob_account := bob_account + money;
+     bob_account := bob_account + money;
   end if;
 C: assert alice_account >= 0;
 end process
@@ -21,5 +21,4 @@ end algorithm *)
 \* generated TLA will go here
 
 MoneyInvariant == alice_account + bob_account = account_total
-
 =============================================================================
