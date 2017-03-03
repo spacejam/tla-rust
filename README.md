@@ -1,33 +1,35 @@
 # tla+rust → <img src="parrot.gif" width="48" height="48" />
 
-Stable stateful systems through modeling, linear types,
-simulation, fault injection, and property testing.
+Stable stateful systems through modeling, linear types and simulation.
 
 I like to use things that wake me up at 4am as rarely as possible.
-It's generally a mistake to focus on reliability as an infrastructure vendor.
+Unfortunately, infrastructure vendors don't focus on reliability.
 Even if a company gives reliability lip service, it's unlikely that they
-use techniques like modeling, fault injection, or quickcheck to back up their
-words. Let's just build an open-source distributed stateful platform that
-takes correctness seriously from the bits on disk, through the local
-transactional logic, through the multi-node transactional logic.
+use techniques like modeling or simulation to create a rock-solid core.
+Let's just build an open-source distributed store that takes correctness
+seriously at the local storage, sharding, and distributed transactional layers.
 
 My goal: verify core lock-free and distributed algorithms in use
 with [rsdb](http://github.com/spacejam/rsdb) and
 [rasputin](http://github.com/disasters/rasputin) with TLA+. Write
-an implementation in Rust. Create property tests that exercise it.
-Use quickcheck and abstracted RPC/clocks to simulate partitions
-and test correctness under failure conditions.
+an implementation in Rust. Use quickcheck and abstracted RPC/clocks
+to simulate partitions and test correctness under failure conditions.
 
-- [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
-- [ ] [lock-free ring buffer](#lock-free-ring-buffer)
-- [ ] [lock-free stack](#lock-free-stack)
-- [ ] [lock-free radix tree](#lock-free-radix-tree)
-- [ ] [lock-free IO buffer](#lock-free-io-buffer)
-- [ ] [lock-free pagecache](#lock-free-pagecache)
-- [ ] [the harpoon consensus protocol](#harpoon-consensus)
-- [ ] [shard splitting](#shard-splitting)
-- [ ] [shard merging] (#shard-merging)
-- [ ] [cross-shard 2PC](#cross-shard-2pc)
+1. ##### overview of topics covered
+  - [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
+2. ##### lock-free algorithms for local storage
+  - [ ] [lock-free ring buffer](#lock-free-ring-buffer)
+  - [ ] [lock-free stack](#lock-free-stack)
+  - [ ] [lock-free radix tree](#lock-free-radix-tree)
+  - [ ] [lock-free IO buffer](#lock-free-io-buffer)
+  - [ ] [lock-free pagecache](#lock-free-pagecache)
+3. ##### consensus within a shard
+  - [ ] [the harpoon consensus protocol](#harpoon-consensus)
+4. ##### sharding operations
+  - [ ] [shard splitting](#shard-splitting)
+  - [ ] [shard merging] (#shard-merging)
+5. ##### distributed transactions
+  - [ ] [cross-shard 2PC](#cross-shard-2pc)
 
 # here we go... jumping into pluscal
 
