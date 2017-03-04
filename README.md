@@ -95,12 +95,70 @@ pcal2tla pcal_intro.tla
 tlc pcal_intro.tla
 ```
 
-BOOM! This blows up because our transaction code sucks, big time. Looking at the trace
-that tlc outputs, it shows us how alice's account may become negative. Because processes
-1 and 2 execute the steps sequentially but with different interleavings, the algorithm
-will check `alice_account >= money` before trying to transfer it to bob. By the time one
-process subtracts the code from alice, however, the other process may have already done so.
-We can specify that these steps and checks happen atomically by changing:
+BOOM! This blows up because our transaction code sucks, big time:
+
+```
+The first argument of Assert evaluated to FALSE; the second argument was:
+"Failure of assertion at line 16, column 4."
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ bob_account = 10
+/\ money = <<1, 10>>
+/\ alice_account = 10
+/\ pc = <<"Transfer", "Transfer">>
+/\ account_total = 20
+
+State 2: <Action line 35, col 19 to line 40, col 42 of module pcal_intro>
+/\ bob_account = 10
+/\ money = <<1, 10>>
+/\ alice_account = 10
+/\ pc = <<"A", "Transfer">>
+/\ account_total = 20
+
+State 3: <Action line 35, col 19 to line 40, col 42 of module pcal_intro>
+/\ bob_account = 10
+/\ money = <<1, 10>>
+/\ alice_account = 10
+/\ pc = <<"A", "A">>
+/\ account_total = 20
+
+State 4: <Action line 42, col 12 to line 45, col 63 of module pcal_intro>
+/\ bob_account = 10
+/\ money = <<1, 10>>
+/\ alice_account = 9
+/\ pc = <<"B", "A">>
+/\ account_total = 20
+
+State 5: <Action line 47, col 12 to line 50, col 65 of module pcal_intro>
+/\ bob_account = 11
+/\ money = <<1, 10>>
+/\ alice_account = 9
+/\ pc = <<"C", "A">>
+/\ account_total = 20
+
+State 6: <Action line 42, col 12 to line 45, col 63 of module pcal_intro>
+/\ bob_account = 11
+/\ money = <<1, 10>>
+/\ alice_account = -1
+/\ pc = <<"C", "B">>
+/\ account_total = 20
+
+Error: The error occurred when TLC was evaluating the nested
+expressions at the following positions:
+0. Line 52, column 15 to line 52, column 28 in pcal_intro
+1. Line 53, column 15 to line 54, column 66 in pcal_intro
+
+
+9097 states generated, 6164 distinct states found, 999 states left on queue.
+The depth of the complete state graph search is 7.
+```
+
+Looking at the trace that tlc outputs, it shows us how alice's account may become
+negative. Because processes 1 and 2 execute the steps sequentially but with 
+different interleavings, the algorithm will check `alice_account >= money`
+before trying to transfer it to bob. By the time one process subtracts the 
+money from alice, however, the other process may have already done so. We can 
+specify that these steps and checks happen atomically by changing:
 
 ```
   Transfer:
