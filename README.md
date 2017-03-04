@@ -268,6 +268,7 @@ Uses the pagecache to store B+ tree pages.
 # consensus within a shard
 We use a consensus protocol as the basis of our replication across a shard.
 Consensus notes:
+
 1. support OLTP with small replication batch size
 1. support batch loading and analytical jobs with large replication batch size
 1. for max throughput with a single shard, send disparate 1/N of the batch to
@@ -289,6 +290,7 @@ of any other node which has seen more successful log entries.
 
 # sharding operations
 Sharding has these ideals:
+
 1. avoid unnecessary data movement (wait some time before replacing a failed node)
 2. if multiple nodes fail simultaneously, minimize chances of dataloss ([chainsets](https://github.com/rescrv/HyperDex/blob/8d8ca6781cdfa6b72869c466caa32f076576c43d/coordinator/replica_sets.cc#L71))
 3. minimize MTTR when a node fails (lots of shards per machine, reduce membership overlap)
@@ -305,6 +307,7 @@ If we treat shard metadata as just another range, how do we prevent
 split brain?
 
 General initialization and key metadata:
+
 1. nodes are configured with a set of "seed nodes" to initially connect to
 1. cluster is initialized when some node is explicitly given permission to do so, either
    via argv, env var, conf file or admin REST api request
@@ -319,6 +322,7 @@ General initialization and key metadata:
 
 ## shard splitting
 Split algorithm:
+
 1. as operations happen in a range, we keep track of the max and min keys,
    and keep a running average for the position between max and min of inserts.
    We then choose a split point around there. If keys are always added to one end,
@@ -333,6 +337,7 @@ Split algorithm:
 
 ## shard merging
 Merge algorithm:
+
 1. merge intent written to metadata range
 1. the smaller half is to move to the larger's servers
 1. this direction is marked at the time of intent, to prevent flapping
@@ -346,6 +351,7 @@ Merge algorithm:
 # distributed transactions
 ## cross-shard 2PC
 Relatively simple lock-free distributed transactions:
+
 1. read all involved data
 1. create txn object somewhere
 1. CAS all involved data to refer to the txn object
