@@ -16,9 +16,14 @@ an implementation in Rust. Use quickcheck and abstracted RPC/clocks
 to simulate partitions and test correctness under failure conditions.
 
 ##### table of contents
-1. overview of topics covered
+1. [motivations for doing this at all](#motivations)
+  - [ ] [what do the words "simulate" and "model mean in this context?](#terminology)
+  - [ ] [why use Rust?](#why-rust)
+  - [ ] [why simulate?](#why-simulate)
+  - [ ] [why model?](#why-model)
+1. [introductions to TLA+, PlusCal, quickcheck](#introductions)
   - [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
-2. lock-free algorithms for efficient local storage
+1. lock-free algorithms for efficient local storage
   - [ ] [lock-free ring buffer](#lock-free-ring-buffer)
   - [ ] [lock-free list](#lock-free-liss)
   - [ ] [lock-free stack](#lock-free-stack)
@@ -27,14 +32,84 @@ to simulate partitions and test correctness under failure conditions.
   - [ ] [lock-free epoch-based garbage collector](#lock-free-epoch-based-gc)
   - [ ] [lock-free pagecache](#lock-free-pagecache)
   - [ ] [lock-free tree](#lock-free-tree)
-3. consensus within a shard
+1. consensus within a shard
   - [ ] [the harpoon consensus protocol](#harpoon-consensus)
-4. sharding operations
+1. sharding operations
   - [ ] [shard splitting](#shard-splitting)
   - [ ] [shard merging] (#shard-merging)
-5. distributed transactions
+1. distributed transactions
   - [ ] [cross-shard 2PC](#cross-shard-2pc)
 
+# motivations
+## terminology
+## why rust?
+Rust is a new systems programming language that emphasizes memory safety.
+It is notable for its compiler, which is able to make several types of
+common memory corruption bugs (and attack vectors for exploits) impossible
+to create by default, without relying on GC. It is a Mozilla project,
+and as of this writing, it is starting to be included in their Firefox
+web browser.
+
+It uses an "ownership" system that ensures an object's
+destructor will run exactly once, preventing double-free, dangling pointer,
+and null pointer bugs.
+When an object is created inside a function's scope, it exists as the property
+of that scope. The object's lifetime is the same as the lifetime of the scope
+that created it.
+
+When the lifetime of an object is over, the object's destructor is run.
+When you pass an object to a function as an argument, that object becomes
+the property of the called function, and when the called function
+returns, the objects in its posession will be destroyed unless the function
+is returning them. Objects returned from a function become the property
+of the calling scope.
+
+In order to pass an object to several functions, you may instead pass a
+reference. By passing a reference, the object remains the property of the
+current scope. It is possible to create references that imply sole ownership,
+called mutable references, which may be used to, you guessed it, mutate
+the object being referred to. This is useful for using an object with
+a function that will mutate it, without the object becoming
+the property of that function, and allowing the object to outlive the
+mutating function.
+While only a single mutable reference may be created, infinite immutable
+references may be created, so long as they do not outlive the object
+that the reference points to.
+
+Rust does not use GC by default. However, it does have several
+container types that rely on reference counting for preventing an
+object's destructor from being called multiple times. These are useful
+for sharing things with multiple scopes and multiple threads. These
+objects are generally rare compared to the total number of objects 
+created in a typical Rust program's execution. The lack of GC for 
+every object may be a compelling feature for those creating
+high-performance systems. Many such systems are currently written
+in C and C++, which have a long track record of buggy and insecure 
+code, even when written by security-conscious life-long practitioners.
+
+Rust has the potential to make high-performance, widely-deployed 
+systems much more secure and crash less frequently. This means web
+browsers, SSL libraries, operating systems, networking stacks,
+toasters and many vital systems that are much harder to hack and more 
+robust against common bugs.
+
+For databases, the memory safety benefits are wonderful, and I'm betting
+on being able to achieve faster long-term iteration by not spending
+so much time chasing down memory-related bugs. However, it needs to be
+noted that when creating lock-free high-performance algorithms, we
+are going to need to sidestep the safety guarantees of the compiler.
+Our goal is to create data structures that are mutated using atomic 
+compare-and-swap (CAS) operations by multiple threads simultaneously,
+and also supporting reads at the same time. This means using Rust's
+`Box::into_raw`/`from_raw`, `AtomicPtr`, unsafe pointers and `mem::forget`.
+We are giving up a significant benefit of Rust for certain very
+high-performance chunks of this system. In place of Rust's compiler,
+we use the TLA+ model checker to gain confidence in the correctness
+of our system!
+
+## why model?
+## why simulate?
+# introductions
 ## here we go... jumping into pluscal
 
 This is a summary of an example from
