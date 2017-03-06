@@ -19,8 +19,8 @@ to simulate partitions and test correctness under failure conditions.
 1. [motivations for doing this at all](#motivations)
   - [x] [what do the words "simulate" and "model mean in this context?](#terminology)
   - [x] [why use Rust?](#why-rust)
-  - [x] [why simulate?](#why-simulate)
   - [x] [why model?](#why-model)
+  - [x] [why simulate?](#why-simulate)
 1. [introductions to TLA+, PlusCal, quickcheck](#introductions)
   - [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
 1. lock-free algorithms for efficient local storage
