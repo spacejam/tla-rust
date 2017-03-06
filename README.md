@@ -39,7 +39,7 @@ to simulate partitions and test correctness under failure conditions.
   - [ ] [shard splitting](#shard-splitting)
   - [ ] [shard merging] (#shard-merging)
 1. distributed transactions
-  - [ ] [cross-shard 2PC](#cross-shard-2pc)
+  - [ ] [a lock-free distributed transaction protocol](#cross-shard-lock-free-transactions)
 
 # motivations
 ## terminology
@@ -177,7 +177,7 @@ We want to use TLA+ to model and find bugs in things like:
 
 * CAS operations on lists, ring buffers, and radix trees for lock-free local systems
 * paxos-like consensus for leadership, replication and shard management systems
-* two phase commit (2PC) for distributed transactions
+* lock-free distributed transactions
 
 Distributed and concurrent algorithms have many similarities, but there are
 some key differences in the primitives that we build on in our work.
@@ -525,7 +525,7 @@ Merge algorithm:
 1. remove handlers and metadata for old range
 
 # distributed transactions
-## cross-shard 2PC
+## cross-shard lock-free transactions
 Relatively simple lock-free distributed transactions:
 
 1. read all involved data
