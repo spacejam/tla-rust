@@ -17,10 +17,10 @@ to simulate partitions and test correctness under failure conditions.
 
 ##### table of contents
 1. [motivations for doing this at all](#motivations)
-  - [ ] [what do the words "simulate" and "model mean in this context?](#terminology)
-  - [ ] [why use Rust?](#why-rust)
-  - [ ] [why simulate?](#why-simulate)
-  - [ ] [why model?](#why-model)
+  - [x] [what do the words "simulate" and "model mean in this context?](#terminology)
+  - [x] [why use Rust?](#why-rust)
+  - [x] [why simulate?](#why-simulate)
+  - [x] [why model?](#why-model)
 1. [introductions to TLA+, PlusCal, quickcheck](#introductions)
   - [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
 1. lock-free algorithms for efficient local storage
@@ -42,6 +42,14 @@ to simulate partitions and test correctness under failure conditions.
 
 # motivations
 ## terminology
+*Simulation*, in this context, refers to writing tests that exercise RPC-related
+code by simulating a buggy network over time, partitions and all. Many more
+failures may be tested per unit of compute time using simulation compared to
+black-box fault injection with something like Namazu, Jepsen, or Blockade.
+
+*Modeling*, in this context, refers to the use of the TLA+ model checker
+to ensure the correctness of our lock-free and distributed algorithms.
+
 ## why rust?
 Rust is a new systems programming language that emphasizes memory safety.
 It is notable for its compiler, which is able to make several types of
@@ -80,17 +88,17 @@ Rust does not use GC by default. However, it does have several
 container types that rely on reference counting for preventing an
 object's destructor from being called multiple times. These are useful
 for sharing things with multiple scopes and multiple threads. These
-objects are generally rare compared to the total number of objects 
-created in a typical Rust program's execution. The lack of GC for 
+objects are generally rare compared to the total number of objects
+created in a typical Rust program. The lack of GC for
 every object may be a compelling feature for those creating
 high-performance systems. Many such systems are currently written
-in C and C++, which have a long track record of buggy and insecure 
+in C and C++, which have a long track record of buggy and insecure
 code, even when written by security-conscious life-long practitioners.
 
-Rust has the potential to make high-performance, widely-deployed 
+Rust has the potential to make high-performance, widely-deployed
 systems much more secure and crash less frequently. This means web
 browsers, SSL libraries, operating systems, networking stacks,
-toasters and many vital systems that are much harder to hack and more 
+toasters and many vital systems that are much harder to hack and more
 robust against common bugs.
 
 For databases, the memory safety benefits are wonderful, and I'm betting
@@ -98,9 +106,10 @@ on being able to achieve faster long-term iteration by not spending
 so much time chasing down memory-related bugs. However, it needs to be
 noted that when creating lock-free high-performance algorithms, we
 are going to need to sidestep the safety guarantees of the compiler.
-Our goal is to create data structures that are mutated using atomic 
+Our goal is to create data structures that are mutated using atomic
 compare-and-swap (CAS) operations by multiple threads simultaneously,
-and also supporting reads at the same time. This means using Rust's
+and also supporting reads at the same time. We choose not to sacrifice
+performance by using Mutexes. This means using Rust's
 `Box::into_raw`/`from_raw`, `AtomicPtr`, unsafe pointers and `mem::forget`.
 We are giving up a significant benefit of Rust for certain very
 high-performance chunks of this system. In place of Rust's compiler,
@@ -108,7 +117,59 @@ we use the TLA+ model checker to gain confidence in the correctness
 of our system!
 
 ## why model?
+TLA+ allows us to specify and verify algorithms in very few lines, compared to
+the programming language that we will use to implement and test it.
+It is a tool that is frequently mentioned by engineers of stateful
+distributed systems, but it has been used by relatively few, and has
+a reputation for being overkill. I believe that this reputation is
+unfounded for this type of work.
+
+Many systems are not well understood by their creators at the start of the
+project, which leads to architectural strain as assumptions are invalidated
+and the project continues to grow over time.
+Small projects are often cheaper to complete using this approach,
+as an incorrect initial assumption may have a lower long-term impact.
+Stateful distributed systems tend to have significant costs associated
+with unanticipated changes in architecture: reliability, iteration time,
+and performance can be expected to take hits. For our system, we will
+specify the core algorithms before implementing them, which will
+allow us to catch mistakes before they result in bugs or outages.
+
 ## why simulate?
+We want to make sure that our implementation is robust against
+network partitions, disk failures, NTP issues, etc...
+So, why not run Namazu, Jepsen, or Blockade? They have great success with
+finding bugs in databases! However, it is far slower to perform black-box
+fault injection than simulation. A simulator can artificially advance
+the clocks of a system to induce a leader election, while a "real" cluster
+has to wait real time to trigger certain logic. It also takes a lot of
+time to deploy new code to a "real" cluster, and it is cumbersome to
+introspect.
+
+Simulation is not a replacement for black-box testing.
+Simulation will be biased, and it's up to the implementor
+of the simulator to ensure that all sources of time, IPC, and other
+interaction are sufficiently encapsulated by the artificial time and
+interaction logic.
+
+Simulation can allow a contributor working on a more resource-constrained
+system to test locally, running through thousands or millions of
+failure situations in the time that it takes to create the RPM/container
+that is then fed to a black-box fault injection system. A CI/CD pipeline
+can get far more test coverage per unit of compute time using simulation
+than with black-box fault injection.
+
+Both simulation and black-box fault injection can be constrained
+to complete in a certain amount of time, but simulation will
+likely find a lot more bugs per unit of compute time. Simulation
+tests may be a reasonable thing to expect to pass for most pull
+requests, since they can achieve a high bug:compute time ratio.
+However, black box fault injection is still important, and will
+probably catch bugs arising from the bias of the simulation authors.
+
+We will also use black-box testing, but we will spend less time talking about 
+it due to its decent existing coverage.
+
 # introductions
 ## here we go... jumping into pluscal
 
@@ -435,5 +496,5 @@ Relatively simple lock-free distributed transactions:
 readers at any point will CAS a txn object to aborted if they encounter an in-progress
 txn on something they are reading.
 
-This can be relaxed to just intended writers, but then our isolation level goes from SSI 
+This can be relaxed to just intended writers, but then our isolation level goes from SSI
 to SI and we are vulnerable to write skew.
