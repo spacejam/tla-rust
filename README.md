@@ -23,6 +23,7 @@ to simulate partitions and test correctness under failure conditions.
   - [x] [why simulate?](#why-simulate)
 1. [introductions to TLA+, PlusCal, quickcheck](#introductions)
   - [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
+  - [ ] [useful primitives for modeling concurrent and distributed algorithms](#useful-primitives)
 1. lock-free algorithms for efficient local storage
   - [ ] [lock-free ring buffer](#lock-free-ring-buffer)
   - [ ] [lock-free list](#lock-free-liss)
@@ -59,8 +60,8 @@ and as of this writing, it is starting to be included in their Firefox
 web browser.
 
 It uses an "ownership" system that ensures an object's
-destructor will run exactly once, preventing double-free, dangling pointer,
-and null pointer bugs.
+destructor will run exactly once, preventing double-frees, dangling pointers,
+various null pointer related bugs, etc...
 When an object is created inside a function's scope, it exists as the property
 of that scope. The object's lifetime is the same as the lifetime of the scope
 that created it.
@@ -167,10 +168,39 @@ requests, since they can achieve a high bug:compute time ratio.
 However, black box fault injection is still important, and will
 probably catch bugs arising from the bias of the simulation authors.
 
-We will also use black-box testing, but we will spend less time talking about 
+We will also use black-box testing, but we will spend less time talking about
 it due to its decent existing coverage.
 
 # introductions
+
+We want to use TLA+ to model and find bugs in things like:
+
+* CAS operations on lists, ring buffers, and radix trees for lock-free local systems
+* paxos-like consensus for leadership, replication and shard management systems
+* two phase commit (2PC) for distributed transactions
+
+Distributed and concurrent algorithms have many similarities, but there are
+some key differences in the primitives that we build on in our work.
+Concurrent algorithms can rely on atomic CAS primitives, as achieving sequentially
+consistent access semantics is fairly well understood and implemented
+at this point. The distributed systems world has many databases that provide strong
+ordering semantics, but it doesn't have such a reliable, standard primitive
+as CAS that we can simply assume to be present. So we need to initially work
+in terms of the "asynchronous communication model" in which messages between
+any two processes can be reordered and arbitrarily delayed, or dropped
+altogether. After we have proved our own model for achieving consistency,
+we will build on it in later higher-level models that describe particularly
+interesting functionality such as lock-free distributed transactions.
+
+In our TLA+ models, we can simply use a fairly short labeled block that performs
+the duties of compare and swap (or another atomic operation) on shared state
+when describing a concurrent algorithm, but we will need to build a complete
+replicated log primitive before we can work at a similar level of abstraction
+in our models of distributed algorithms.
+
+So, let's learn how to describe some of our primitives and invariants!
+
+
 ## here we go... jumping into pluscal
 
 This is a summary of an example from
@@ -331,7 +361,17 @@ SPECIFICATION Spec
 INVARIANT MoneyInvariant
 ```
 
-Ok, now let's start verifying some algorithms we'll use for our database!
+## useful primitives
+So, we've seen how to create labels, processes, and invariants. Here are some other
+useful primitives:
+
+await
+bags
+EXTENDS Naturals, FiniteSets, Sequences, Integers, TLC
+
+For a more in-depth TLA+ introduction, refer to [the tutorial that this
+was summarized from](http://www.learntla.com) and
+[the manual](http://lamport.azurewebsites.net/tla/p-manual.pdf).
 
 # lock-free algorithms for efficient local storage
 
@@ -490,11 +530,20 @@ Relatively simple lock-free distributed transactions:
 
 1. read all involved data
 1. create txn object somewhere
-1. CAS all involved data to refer to the txn object
+1. CAS all involved data to refer to the txn object and the conditionally mutated state
 1. CAS the txn object to successful
+1. (can crash here and the txn is still valid)
+1. CAS all affected data to replace the value, and remove the txn reference
 
 readers at any point will CAS a txn object to aborted if they encounter an in-progress
-txn on something they are reading.
+txn on something they are reading. if the txn object is successful, the reader needs
+to CAS the object's conditionally mutated state to be the present state, and nuke the
+txn reference, before continuing.
 
 This can be relaxed to just intended writers, but then our isolation level goes from SSI
 to SI and we are vulnerable to write skew.
+
+Invariants:
+
+1. must never see any intermediate states, a transaction must be entirely
+   committed or entirely invisible.
