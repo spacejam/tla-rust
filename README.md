@@ -17,7 +17,7 @@ to simulate partitions and test correctness under failure conditions.
 
 ##### table of contents
 1. [motivations for doing this at all](#motivations)
-  - [x] [what do the words "simulate" and "model mean in this context?](#terminology)
+  - [x] [what do the words "simulate" and "model" mean in this context?](#terminology)
   - [x] [why use Rust?](#why-rust)
   - [x] [why model?](#why-model)
   - [x] [why simulate?](#why-simulate)
@@ -37,7 +37,7 @@ to simulate partitions and test correctness under failure conditions.
   - [ ] [the harpoon consensus protocol](#harpoon-consensus)
 1. sharding operations
   - [ ] [shard splitting](#shard-splitting)
-  - [ ] [shard merging] (#shard-merging)
+  - [ ] [shard merging](#shard-merging)
 1. distributed transactions
   - [ ] [a lock-free distributed transaction protocol](#cross-shard-lock-free-transactions)
 
