@@ -24,7 +24,7 @@ to simulate partitions and test correctness under failure conditions.
 2. [introductions to TLA+, PlusCal, quickcheck](#introductions)
   - [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
   - [ ] [useful primitives for modeling concurrent and distributed algorithms](#useful-primitives)
-1. lock-free algorithms for efficient local storage
+3. lock-free algorithms for efficient local storage
   - [ ] [lock-free ring buffer](#lock-free-ring-buffer)
   - [ ] [lock-free list](#lock-free-liss)
   - [ ] [lock-free stack](#lock-free-stack)
@@ -33,12 +33,12 @@ to simulate partitions and test correctness under failure conditions.
   - [ ] [lock-free epoch-based garbage collector](#lock-free-epoch-based-gc)
   - [ ] [lock-free pagecache](#lock-free-pagecache)
   - [ ] [lock-free tree](#lock-free-tree)
-1. consensus within a shard
+4. consensus within a shard
   - [ ] [the harpoon consensus protocol](#harpoon-consensus)
-1. sharding operations
+5. sharding operations
   - [ ] [shard splitting](#shard-splitting)
   - [ ] [shard merging](#shard-merging)
-1. distributed transactions
+6. distributed transactions
   - [ ] [a lock-free distributed transaction protocol](#cross-shard-lock-free-transactions)
 
 # motivations
