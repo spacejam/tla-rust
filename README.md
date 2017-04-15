@@ -21,7 +21,7 @@ to simulate partitions and test correctness under failure conditions.
   - [x] [why use Rust?](#why-rust)
   - [x] [why model?](#why-model)
   - [x] [why simulate?](#why-simulate)
-1. [introductions to TLA+, PlusCal, quickcheck](#introductions)
+2. [introductions to TLA+, PlusCal, quickcheck](#introductions)
   - [x] [intro: specifying concurrent processes with pluscal](#here-we-go-jumping-into-pluscal)
   - [ ] [useful primitives for modeling concurrent and distributed algorithms](#useful-primitives)
 1. lock-free algorithms for efficient local storage
