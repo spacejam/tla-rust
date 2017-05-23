@@ -211,8 +211,8 @@ We test models using `tlc`, which understands most of TLA (not infinite sets, ma
 other stuff). TLA started as a specification language, tlc came along later to
 actually test it, and pluscal is a simpler language that can be transpiled into
 TLA. Pluscal has two forms, `c` and `p`. They are functionally identical, but
-`c` form uses braces and `p` form uses prolog/ruby-esque `begin` and `end`
-statements that can be a little easier to spot errors with, in my opinion.
+`c` form uses braces and `p` form uses `begin` and `end` statements that can be a
+little easier to spot errors with, in my opinion.
 
 We're writing Pluscal in a TLA comment (block comments are written
 with `(* <comment text> *)`), and when we run a translator like `pcal2tla`
